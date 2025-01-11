@@ -103,6 +103,20 @@ rvstf() {
   notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
 }
 
+rvrtfa() {
+  notify-send --app-name="screenshot" "Screenshot" "Select a region to record"
+  dt=$1
+  wf-recorder -g "$(slurp)" -f "$screenshot_directory/$dt.mp4" --audio
+  notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
+}
+
+rvstfa() {
+  countdown
+  dt=$1
+  wf-recorder -f "$screenshot_directory/$dt.mp4" --audio
+  notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
+}
+
 stop_recording() {
   if [ -z "$(pgrep wf-recorder)" ]; then
     notify-send --app-name="screenshot" "Screenshot" "No recording found"
@@ -124,6 +138,8 @@ get_options() {
   echo "  Screen  File (GIF)"
   echo "  Region  File (MP4)"
   echo "  Screen  File (MP4)"
+  echo "  Region  File (MP4 with audio)"
+  echo "  Screen  File (MP4 with audio)"
   echo "  Stop recording"
 }
 
@@ -251,6 +267,12 @@ main() {
     '  Screen  File (MP4)')
       rvstf "$dt"
       ;;
+    '  Region  File (MP4 with audio)')
+      rvrtfa "$dt"
+      ;;
+    '  Screen  File (MP4 with audio)')
+      rvstfa "$dt"
+      ;;
     '  Stop recording')
       stop_recording
       ;;
@@ -265,4 +287,3 @@ main "$@" &
 exit 0
 
 ! /bin/bash
-
