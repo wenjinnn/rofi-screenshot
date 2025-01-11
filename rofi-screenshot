@@ -11,7 +11,7 @@
 screenshot_directory="${ROFI_SCREENSHOT_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots}"
 
 # Default date format
-default_date_format="${ROFI_SCREENSHOT_DATE_FORMAT:-"+%d-%m-%Y %H:%M:%S"}"
+default_date_format="${ROFI_SCREENSHOT_DATE_FORMAT:-"+%Y-%d-%m_%H-%M-%S"}"
 
 # set ffmpeg defaults
 ffmpeg() {
@@ -34,51 +34,45 @@ countdown() {
 
 crtc() {
   notify-send --app-name="screenshot" "Screenshot" "Select a region to capture"
-  ffcast -q "$(slop -n -f '-g %g ')" png /tmp/screenshot_clip.png
-  xclip -selection clipboard -t image/png /tmp/screenshot_clip.png
-  rm /tmp/screenshot_clip.png
+  grim -g "$(slurp)" - | wl-copy
   notify-send --app-name="screenshot" "Screenshot" "Region copied to Clipboard"
 }
 
 crtf() {
   notify-send --app-name="screenshot" "Screenshot" "Select a region to capture"
   dt=$1
-  ffcast -q "$(slop -n -f '-g %g ')" png "$screenshot_directory/$dt.png"
+  grim -g "$(slurp)" "$screenshot_directory/$dt.png"
   notify-send --app-name="screenshot" "Screenshot" "Region saved to ${screenshot_directory//${HOME}/~}/$dt.png"
 }
 
 cwtc() {
   notify-send --app-name="screenshot" "Screenshot" "Select a window to capture"
-  ffcast -q -w png /tmp/screenshot_clip.png
-  xclip -selection clipboard -t image/png /tmp/screenshot_clip.png
-  rm /tmp/screenshot_clip.png
+  grim -g "$(hyprctl clients -j | jq -r ".[] | select(.workspace.id | IN($(hyprctl -j monitors | jq 'map(.activeWorkspace.id) | join(",")' | tr -d \")))" | jq -r ".at,.size" | jq -s "add" | jq '_nwise(4)' | jq -r '"\(.[0]),\(.[1]) \(.[2])x\(.[3])"'| slurp)" - | wl-copy
   notify-send --app-name="screenshot" "Screenshot" "Window copied to Clipboard"
 }
 
 cwtf() {
   notify-send --app-name="screenshot" "Screenshot" "Select a window to capture"
   dt=$1
-  ffcast -q "$(slop -n -f '-g %g ')" png "$screenshot_directory/$dt.png"
+  grim -g "$(hyprctl clients -j | jq -r ".[] | select(.workspace.id | IN($(hyprctl -j monitors | jq 'map(.activeWorkspace.id) | join(",")' | tr -d \")))" | jq -r ".at,.size" | jq -s "add" | jq '_nwise(4)' | jq -r '"\(.[0]),\(.[1]) \(.[2])x\(.[3])"'| slurp)" "$screenshot_directory/$dt.png"
   notify-send --app-name="screenshot" "Screenshot" "Window saved to ${screenshot_directory//${HOME}/~}/$dt.png"
 }
 
 cstc() {
-  ffcast -q png /tmp/screenshot_clip.png
-  xclip -selection clipboard -t image/png /tmp/screenshot_clip.png
-  rm /tmp/screenshot_clip.png
+  grim - | wl-copy
   notify-send --app-name="screenshot" "Screenshot" "Screenshot copied to Clipboard"
 }
 
 cstf() {
   dt=$1
-  ffcast -q png "$screenshot_directory/$dt.png"
+  grim "$screenshot_directory/$dt.png"
   notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.png"
 }
 
 rgrtf() {
   notify-send --app-name="screenshot" "Screenshot" "Select a region to record"
   dt=$1
-  ffcast -q "$(slop -n -f '-g %g ' && countdown)" rec /tmp/screenshot_gif.mp4
+  wf-recorder -g "$(slurp)" -f /tmp/screenshot_gif.mp4
   notify-send --app-name="screenshot" "Screenshot" "Converting to gif… (can take a while)"
   video_to_gif /tmp/screenshot_gif.mp4 "$screenshot_directory/$dt.gif"
   rm /tmp/screenshot_gif.mp4
@@ -88,7 +82,7 @@ rgrtf() {
 rgstf() {
   countdown
   dt=$1
-  ffcast -q rec /tmp/screenshot_gif.mp4
+  wf-recorder -f /tmp/screenshot_gif.mp4
   notify-send --app-name="screenshot" "Screenshot" "Converting to gif… (can take a while)"
   video_to_gif /tmp/screenshot_gif.mp4 "$screenshot_directory/$dt.gif"
   rm /tmp/screenshot_gif.mp4
@@ -98,24 +92,24 @@ rgstf() {
 rvrtf() {
   notify-send --app-name="screenshot" "Screenshot" "Select a region to record"
   dt=$1
-  ffcast -q "$(slop -n -f '-g %g ' && countdown)" rec "$screenshot_directory/$dt.mp4"
+  wf-recorder -g "$(slurp)" -f "$screenshot_directory/$dt.mp4"
   notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
 }
 
 rvstf() {
   countdown
   dt=$1
-  ffcast -q rec "$screenshot_directory/$dt.mp4"
+  wf-recorder -f "$screenshot_directory/$dt.mp4"
   notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
 }
 
 stop_recording() {
-  if [ -z "$(pgrep -fxn '(/\S+)*ffmpeg\s.*\sx11grab\s.*')" ]; then
+  if [ -z "$(pgrep wf-recorder)" ]; then
     notify-send --app-name="screenshot" "Screenshot" "No recording found"
     exit 1
   fi
 
-  pkill -fxn '(/\S+)*ffmpeg\s.*\sx11grab\s.*'
+  killall -TERM wf-recorder
   notify-send --app-name="screenshot" "Screenshot" "Recording stopped"
 }
 
@@ -165,11 +159,14 @@ check_directory() {
 
 main() {
   # check dependencies
-  check_deps slop
-  check_deps ffcast
+  check_deps slurp
+  check_deps grim
   check_deps ffmpeg
-  check_deps xclip
+  check_deps wl-copy
+  check_deps wf-recorder
   check_deps rofi
+  check_deps hyprctl
+  check_deps jq
 
   # rebind long args as short ones
   for arg in "$@"; do
