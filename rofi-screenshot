@@ -41,8 +41,9 @@ crtc() {
 crtf() {
   notify-send --app-name="screenshot" "Screenshot" "Select a region to capture"
   dt=$1
-  grim -g "$(slurp)" "$screenshot_directory/$dt.png"
-  notify-send --app-name="screenshot" "Screenshot" "Region saved to ${screenshot_directory//${HOME}/~}/$dt.png"
+  output=$screenshot_directory/$dt.png
+  grim -g "$(slurp)" "$output"
+  optional_action_notify "$output" "Region saved to $output"
 }
 
 cwtc() {
@@ -54,8 +55,9 @@ cwtc() {
 cwtf() {
   notify-send --app-name="screenshot" "Screenshot" "Select a window to capture"
   dt=$1
-  grim -g "$(hyprctl clients -j | jq -r ".[] | select(.workspace.id | IN($(hyprctl -j monitors | jq 'map(.activeWorkspace.id) | join(",")' | tr -d \")))" | jq -r ".at,.size" | jq -s "add" | jq '_nwise(4)' | jq -r '"\(.[0]),\(.[1]) \(.[2])x\(.[3])"'| slurp)" "$screenshot_directory/$dt.png"
-  notify-send --app-name="screenshot" "Screenshot" "Window saved to ${screenshot_directory//${HOME}/~}/$dt.png"
+  output=$screenshot_directory/$dt.png
+  grim -g "$(hyprctl clients -j | jq -r ".[] | select(.workspace.id | IN($(hyprctl -j monitors | jq 'map(.activeWorkspace.id) | join(",")' | tr -d \")))" | jq -r ".at,.size" | jq -s "add" | jq '_nwise(4)' | jq -r '"\(.[0]),\(.[1]) \(.[2])x\(.[3])"'| slurp)" "$output"
+  optional_action_notify "$output" "Window saved to $output"
 }
 
 cstc() {
@@ -66,9 +68,10 @@ cstc() {
 
 cstf() {
   dt=$1
-  grim "$screenshot_directory/$dt.png"
-  notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.png"
+  output=$screenshot_directory/$dt.png
   sleep 1
+  grim "$output"
+  optional_action_notify "$output" "Saved to $output"
 }
 
 rgrtf() {
@@ -177,6 +180,38 @@ check_directory() {
   fi
 }
 
+optional_action_notify() {
+  output=$1
+  notify_detail=$2
+  actions=""
+  if command -v nautilus &> /dev/null; then
+    actions+=' -A "show=Show in files"'
+  fi
+  if command -v xdg-open &> /dev/null; then
+    actions+=' -A "view=View"'
+  fi
+  if command -v swappy &> /dev/null; then
+    actions+=' -A "edit=Edit with swappy"'
+  fi
+  if command -v tesseract &> /dev/null; then
+    actions+=' -A "ocr=OCR"'
+  fi
+  confirm=$(eval "notify-send \
+    $actions \
+    --app-name='screenshot' \
+    'Screenshot' \
+    '$notify_detail'")
+  if [ "show" == "$confirm" ]; then
+    nautilus "$output"
+  elif [ "view" == "$confirm" ]; then
+    xdg-open "$output"
+  elif [ "edit" == "$confirm" ]; then
+    swappy -f "$output"
+  elif [ "ocr" == "$confirm" ]; then
+    tesseract "$output" - | wl-copy
+  fi
+}
+
 main() {
   # check dependencies
   check_deps slurp
@@ -186,6 +221,7 @@ main() {
   check_deps wf-recorder
   check_deps rofi
   check_deps hyprctl
+  check_deps notify-send
   check_deps jq
 
   # rebind long args as short ones
