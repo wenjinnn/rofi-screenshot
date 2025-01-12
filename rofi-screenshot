@@ -10,6 +10,9 @@
 # Screenshot directory
 screenshot_directory="${ROFI_SCREENSHOT_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}/Screenshots}"
 
+# Screenrecord directory
+screenrecord_directory="${ROFI_SCREENRECORD_DIR:-${XDG_VIDEOS_DIR:-$HOME/Videos}/Screenrecords}"
+
 # Default date format
 default_date_format="${ROFI_SCREENSHOT_DATE_FORMAT:-"+%Y-%m-%d_%H-%M-%S"}"
 
@@ -85,7 +88,7 @@ cstf() {
 rgrtf() {
   notify-send --app-name="screenshot" "Screenshot" "Select a region to record"
   dt=$1
-  wf-recorder -g "$(slurp)" -f /tmp/screenshot_gif.mp4
+  wl-screenrec -g "$(slurp)" -f /tmp/screenshot_gif.mp4
   notify-send --app-name="screenshot" "Screenshot" "Converting to gif… (can take a while)"
   video_to_gif /tmp/screenshot_gif.mp4 "$screenshot_directory/$dt.gif"
   rm /tmp/screenshot_gif.mp4
@@ -95,7 +98,7 @@ rgrtf() {
 rgstf() {
   countdown
   dt=$1
-  wf-recorder -f /tmp/screenshot_gif.mp4
+  wl-screenrec -f /tmp/screenshot_gif.mp4
   notify-send --app-name="screenshot" "Screenshot" "Converting to gif… (can take a while)"
   video_to_gif /tmp/screenshot_gif.mp4 "$screenshot_directory/$dt.gif"
   rm /tmp/screenshot_gif.mp4
@@ -103,41 +106,41 @@ rgstf() {
 }
 
 rvrtf() {
-  notify-send --app-name="screenshot" "Screenshot" "Select a region to record"
+  notify-send --app-name="screenrecord" "Screenrecord" "Select a region to record"
   dt=$1
-  wf-recorder -g "$(slurp)" -f "$screenshot_directory/$dt.mp4"
-  notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
+  wl-screenrec -g "$(slurp)" -f "$screenrecord_directory/$dt.mp4"
+  notify-send --app-name="screenrecord" "Screenrecord" "Saved to ${screenrecord_directory//${HOME}/~}/$dt.mp4"
 }
 
 rvstf() {
   countdown
   dt=$1
-  wf-recorder -f "$screenshot_directory/$dt.mp4"
-  notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
+  wl-screenrec -f "$screenrecord_directory/$dt.mp4"
+  notify-send --app-name="screenrecord" "Screenrecord" "Saved to ${screenrecord_directory//${HOME}/~}/$dt.mp4"
 }
 
 rvrtfa() {
-  notify-send --app-name="screenshot" "Screenshot" "Select a region to record"
+  notify-send --app-name="screenrecord" "Screenrecord" "Select a region to record"
   dt=$1
-  wf-recorder -g "$(slurp)" -f "$screenshot_directory/$dt.mp4" --audio
-  notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
+  wl-screenrec -g "$(slurp)" -f "$screenrecord_directory/$dt.mp4" --audio
+  notify-send --app-name="screenrecord" "Screenrecord" "Saved to ${screenrecord_directory//${HOME}/~}/$dt.mp4"
 }
 
 rvstfa() {
   countdown
   dt=$1
-  wf-recorder -f "$screenshot_directory/$dt.mp4" --audio
-  notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.mp4"
+  wl-screenrec -f "$screenrecord_directory/$dt.mp4" --audio
+  notify-send --app-name="screenrecord" "Screenrecord" "Saved to ${screenrecord_directory//${HOME}/~}/$dt.mp4"
 }
 
 stop_recording() {
-  if [ -z "$(pgrep wf-recorder)" ]; then
-    notify-send --app-name="screenshot" "Screenshot" "No recording found"
+  if [ -z "$(pgrep wl-screenrec)" ]; then
+    notify-send --app-name="screenrecord" "Screenrecord" "No recording found"
     exit 1
   fi
 
-  killall -TERM wf-recorder
-  notify-send --app-name="screenshot" "Screenshot" "Recording stopped"
+  killall -TERM wl-screenrec
+  notify-send --app-name="screenrecord" "Screenrecord" "Recording stopped"
 }
 
 get_options() {
@@ -226,7 +229,7 @@ main() {
   check_deps grim
   check_deps ffmpeg
   check_deps wl-copy
-  check_deps wf-recorder
+  check_deps wl-screenrec
   check_deps rofi
   check_deps hyprctl
   check_deps notify-send

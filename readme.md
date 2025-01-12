@@ -57,7 +57,7 @@ $ rofi-screenshot -i
 * [slurp](https://github.com/emersion/slurp)
 * [ffmpeg](https://ffmpeg.org/)
 * [wl-clipboard](https://github.com/bugaevc/wl-clipboard)
-* [wf-recorder](https://github.com/ammen99/wf-recorder)
+* [wl-screenrec](https://github.com/russelltg/wl-screenrec)
 * [libnotify](https://gitlab.gnome.org/GNOME/libnotify)
 * [jq](https://jqlang.github.io/jq/)
 * [swappy](https://github.com/jtheoof/swappy) optional, for Edit with swappy action in notification
