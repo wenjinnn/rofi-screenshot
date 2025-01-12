@@ -59,6 +59,7 @@ cwtf() {
 }
 
 cstc() {
+  sleep 1
   grim - | wl-copy
   notify-send --app-name="screenshot" "Screenshot" "Screenshot copied to Clipboard"
 }
@@ -67,6 +68,7 @@ cstf() {
   dt=$1
   grim "$screenshot_directory/$dt.png"
   notify-send --app-name="screenshot" "Screenshot" "Saved to ${screenshot_directory//${HOME}/~}/$dt.png"
+  sleep 1
 }
 
 rgrtf() {
