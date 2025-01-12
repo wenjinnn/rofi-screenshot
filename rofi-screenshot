@@ -48,7 +48,11 @@ crtf() {
 
 cwtc() {
   notify-send --app-name="screenshot" "Screenshot" "Select a window to capture"
-  grim -g "$(hyprctl clients -j | jq -r ".[] | select(.workspace.id | IN($(hyprctl -j monitors | jq 'map(.activeWorkspace.id) | join(",")' | tr -d \")))" | jq -r ".at,.size" | jq -s "add" | jq '_nwise(4)' | jq -r '"\(.[0]),\(.[1]) \(.[2])x\(.[3])"'| slurp)" - | wl-copy
+  if [ "sway" == "$XDG_CURRENT_DESKTOP" ]; then
+    grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)" - | wl-copy
+  else
+    grim -g "$(hyprctl clients -j | jq -r ".[] | select(.workspace.id | IN($(hyprctl -j monitors | jq 'map(.activeWorkspace.id) | join(",")' | tr -d \")))" | jq -r ".at,.size" | jq -s "add" | jq '_nwise(4)' | jq -r '"\(.[0]),\(.[1]) \(.[2])x\(.[3])"'| slurp)" - | wl-copy
+  fi
   notify-send --app-name="screenshot" "Screenshot" "Window copied to Clipboard"
 }
 
@@ -56,7 +60,11 @@ cwtf() {
   notify-send --app-name="screenshot" "Screenshot" "Select a window to capture"
   dt=$1
   output=$screenshot_directory/$dt.png
-  grim -g "$(hyprctl clients -j | jq -r ".[] | select(.workspace.id | IN($(hyprctl -j monitors | jq 'map(.activeWorkspace.id) | join(",")' | tr -d \")))" | jq -r ".at,.size" | jq -s "add" | jq '_nwise(4)' | jq -r '"\(.[0]),\(.[1]) \(.[2])x\(.[3])"'| slurp)" "$output"
+  if [ "sway" == "$XDG_CURRENT_DESKTOP" ]; then
+    grim -g "$(swaymsg -t get_tree | jq -r '.. | select(.pid? and .visible?) | .rect | "\(.x),\(.y) \(.width)x\(.height)"' | slurp)" - | wl-copy
+  else
+    grim -g "$(hyprctl clients -j | jq -r ".[] | select(.workspace.id | IN($(hyprctl -j monitors | jq 'map(.activeWorkspace.id) | join(",")' | tr -d \")))" | jq -r ".at,.size" | jq -s "add" | jq '_nwise(4)' | jq -r '"\(.[0]),\(.[1]) \(.[2])x\(.[3])"'| slurp)" - | wl-copy
+  fi
   optional_action_notify "$output" "Window saved to $output"
 }
 
