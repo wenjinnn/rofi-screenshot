@@ -8,6 +8,7 @@ Plus, there's so many different things I might want to do I struggle to find key
 
 ### Features
 * Capture a region to the clipboard or a directory
+* Capture a window to the clipboard or a directory
 * Capture the whole screen to the clipboard or a directory
 * Record a specific region and save as a gif or MP4, optionally with audio
 * Record the whole screen and save as a gif or MP4, optionally with audio
