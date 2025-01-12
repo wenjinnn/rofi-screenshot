@@ -155,6 +155,8 @@ show_help() {
   echo "USAGE: rofi-screenshot [OPTION] <argument>"
   echo "(no option)"
   echo "    show the screenshot menu"
+  echo "-i, --immediately"
+  echo "    take a screenshot immediately without opening Rofi"
   echo "-s, --stop"
   echo "    stop recording"
   echo "-h, --help"
@@ -191,6 +193,7 @@ main() {
       '--help') set -- "$@" '-h' ;;
       '--directory') set -- "$@" '-d' ;;
       '--timestamp') set -- "$@" '-t' ;;
+      '--immediately') set -- "$@" '-i' ;;
       '--stop') set -- "$@" '-s' ;;
       *) set -- "$@" "$arg" ;;
     esac
@@ -199,7 +202,7 @@ main() {
   # parse short options
   OPTIND=1
   date_format="$default_date_format"
-  while getopts "hd:t:s" opt; do
+  while getopts "hd:t:s:i" opt; do
     case "$opt" in
       'h')
         show_help
@@ -214,6 +217,10 @@ main() {
         ;;
       's')
         stop_recording
+        exit 0
+        ;;
+      'i')
+        cstc
         exit 0
         ;;
       '?')
