@@ -53,7 +53,7 @@ $ rofi-screenshot -i
 
 ### Dependencies
 
-* [rofi](https://github.com/davatorium/rofi)
+* [rofi](https://github.com/lbonn/rofi)
 * [grim](https://sr.ht/~emersion/grim/)
 * [slurp](https://github.com/emersion/slurp)
 * [ffmpeg](https://ffmpeg.org/)
