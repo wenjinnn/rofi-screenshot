@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ## rofi-screenshot
-## Author: ceuk @ github
+## Author: ceuk & wenjinnn @ github
 ## Licence: WTFPL
 ## Usage:
 ##    show the menu with rofi-screenshot
