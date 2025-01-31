@@ -173,6 +173,8 @@ show_help() {
   echo "    show the screenshot menu"
   echo "-i, --immediately"
   echo "    take a screenshot immediately without opening Rofi"
+  echo "-I, --immediately-to-file"
+  echo "    take a screenshot immediately and save it to file without opening Rofi"
   echo "-s, --stop"
   echo "    stop recording"
   echo "-h, --help"
@@ -243,6 +245,7 @@ main() {
       '--directory') set -- "$@" '-d' ;;
       '--timestamp') set -- "$@" '-t' ;;
       '--immediately') set -- "$@" '-i' ;;
+      '--immediately-to-file') set -- "$@" '-I' ;;
       '--stop') set -- "$@" '-s' ;;
       *) set -- "$@" "$arg" ;;
     esac
@@ -251,7 +254,9 @@ main() {
   # parse short options
   OPTIND=1
   date_format="$default_date_format"
-  while getopts "hd:t:s:i" opt; do
+  cmd='date "${date_format}"'
+  dt=$(eval $cmd)
+  while getopts "hd:t:s:i:I" opt; do
     case "$opt" in
       'h')
         show_help
@@ -272,6 +277,10 @@ main() {
         cstc
         exit 0
         ;;
+      'I')
+        cstf "$dt"
+        exit 0
+        ;;
       '?')
         show_help
         exit 1
@@ -287,9 +296,6 @@ main() {
   if [[ -z "${choice// /}" ]]; then
     exit 1
   fi
-
-  cmd='date "${date_format}"'
-  dt=$(eval $cmd)
 
   # run the selected command
   case $choice in
